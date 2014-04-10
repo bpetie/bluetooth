@@ -87,6 +87,7 @@ public class ECG extends Fragment implements ChartFragment.OnChartListener{
 		// Inflate the layout for this fragment
 		rootView = inflater.inflate(R.layout.fragment_ecg, container, false);
 		textview = (TextView) rootView.findViewById (R.id.textView1);
+		//textview.setText("100");
 		BluetoothChat main = (BluetoothChat) getActivity();
 		return rootView;
 	}

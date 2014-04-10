@@ -130,18 +130,17 @@ public class BluetoothChat extends FragmentActivity implements
 
         mContext = getApplicationContext();
         mWindow = getWindow();
-        timer = new CountDownTimer(60000, 1000) 
+        timer = new CountDownTimer(10000, 1000) 
         {
              public void onTick(long millisUntilFinished) 
              {
-
              }
 
              public void onFinish() 
              {
             	 ECG ecg = (ECG) mSectionsPagerAdapter.getItem(0);
             	 if (ecg.textview != null)
-            		 ecg.textview.setText(packetCount);
+            		 ecg.textview.setText(packetCount * 6 + "");
             	 packetCount = 0;
             	 timer.cancel();
             	 timer.start();
