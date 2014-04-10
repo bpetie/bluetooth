@@ -12,6 +12,7 @@ import org.achartengine.GraphicalView;
 import org.achartengine.chart.PointStyle;
 import org.achartengine.model.TimeSeries;
 import org.achartengine.model.XYMultipleSeriesDataset;
+import org.achartengine.renderer.SimpleSeriesRenderer;
 import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 
@@ -24,6 +25,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import android.widget.LinearLayout.LayoutParams;
 
 public class ChartFragment extends Fragment{
@@ -34,6 +36,7 @@ public class ChartFragment extends Fragment{
   
   private static Random RAND = new Random();
   private XYMultipleSeriesRenderer mRenderer;
+  private SimpleSeriesRenderer simpleRenderer;
   private XYMultipleSeriesDataset mDataset;
   private GraphicalView mChartView;
 
@@ -63,6 +66,8 @@ public class ChartFragment extends Fragment{
     
     mDataset = new XYMultipleSeriesDataset();
     mRenderer = new XYMultipleSeriesRenderer();
+    //simpleRenderer = new SimpleSeriesRenderer();
+    //mRenderer.addSeriesRenderer(simpleRenderer);
     
     mRenderer.setLabelsColor(Color.LTGRAY);
     mRenderer.setAxesColor(Color.LTGRAY);
@@ -70,9 +75,9 @@ public class ChartFragment extends Fragment{
     mRenderer.setBackgroundColor(Color.BLACK);
     mRenderer.setApplyBackgroundColor(true);
     
-    mRenderer.setLegendTextSize(20);
+    mRenderer.setLegendTextSize(0);
     mRenderer.setLabelsTextSize(20);
-    mRenderer.setPointSize(8);
+    mRenderer.setPointSize(1);
     mRenderer.setMargins(new int[] { 60, 60, 60, 60 });
     
     mRenderer.setFitLegend(true);
@@ -191,11 +196,17 @@ public class ChartFragment extends Fragment{
     mSeries.put(item, series);
     mDataset.addSeries(series);
     mRenderer.addSeriesRenderer(getSeriesRenderer(Color.GREEN));
+    
+    // hide values in the graph
+    int length = mRenderer.getSeriesRendererCount();
+    for (int i = 0; i < length; i++) {
+    	mRenderer.getSeriesRendererAt(i).setDisplayChartValues(false);
+    }
   }
 
   
   // change the last parameter in the CountDownTimer to change the plotting speed  
-  private final CountDownTimer mTimer = new CountDownTimer(15 * 60 * 1000, 200) {
+  private final CountDownTimer mTimer = new CountDownTimer(15 * 60 * 1000, 70) {
 	@Override
     public void onTick(final long millisUntilFinished) {
 		// Retrieve next available packet
@@ -214,7 +225,7 @@ public class ChartFragment extends Fragment{
 			}
 		}
     }
-
+	
     @Override
     public void onFinish() {}
   };

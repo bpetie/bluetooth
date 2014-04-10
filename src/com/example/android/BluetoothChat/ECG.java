@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.text.format.Time;
 
 /**
  * A simple {@link android.support.v4.app.Fragment} subclass. Activities that
@@ -103,8 +104,13 @@ public class ECG extends Fragment implements ChartFragment.OnChartListener{
 		if (array != null)
 		{
 			fragment.packetQueue.add(array);
-			if (isSTelevated(array));
-			//	Toast.makeText(getActivity(), "ST Segment Elevation!", Toast.LENGTH_SHORT).show();
+			if (isSTelevated(array)) 
+			{
+				Toast.makeText(getActivity(), "ST Segment Elevation!", Toast.LENGTH_SHORT).show();
+				Time now = new Time();
+				now.setToNow();
+				BluetoothChat.mHistory.add("ST segment elevation detected at\n" + now.format("%Y:%m:%d %H:%M:%S"));
+			}
 		}
 	}
 	

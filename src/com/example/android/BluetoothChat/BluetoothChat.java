@@ -86,6 +86,10 @@ public class BluetoothChat extends FragmentActivity implements
     // Key names received from the BluetoothChatService Handler
     public static final String DEVICE_NAME = "device_name";
     public static final String TOAST = "toast";
+    
+    // Arrayadapter for ST elevation history
+    public static ArrayAdapter<String> mHistory;
+    public static ArrayList<String> mHistoryList;
 
     // Intent request codes
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
@@ -153,6 +157,8 @@ public class BluetoothChat extends FragmentActivity implements
 		
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mHistoryList = new ArrayList<String>();
+        mHistory = new ArrayAdapter<String> (this, android.R.layout.simple_list_item_1, mHistoryList);
 
         // If the adapter is null, then Bluetooth is not supported
         if (mBluetoothAdapter == null) {

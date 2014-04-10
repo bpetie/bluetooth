@@ -67,9 +67,9 @@ public class History extends Fragment {
 			Bundle savedInstanceState) {
 		// Inflate the layout for this fragment
 		View rootView = inflater.inflate(R.layout.fragment_history, container, false);
-		//ListView listView = (ListView) rootView.findViewById (R.id.listView1);
-		//DeviceListActivity main = (DeviceListActivity) getActivity();
-		//listView.setAdapter(main.discoveredAdapter);
+		ListView listView = (ListView) rootView.findViewById (R.id.listView1);
+		BluetoothChat main = (BluetoothChat) getActivity();
+		listView.setAdapter(main.mHistory);
 		return rootView;
 	}
 
