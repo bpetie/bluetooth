@@ -1,8 +1,10 @@
 package com.example.android.BluetoothChat;
 
 import java.util.StringTokenizer;
+
 import android.app.Activity;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.v4.app.Fragment;
@@ -34,6 +36,7 @@ public class ECG extends Fragment implements ChartFragment.OnChartListener{
 	private String mParam2;
 
 	private OnECGUpdateListener mListener;
+	public static TextView textview;
 	
 	View rootView;
 	TextView texts;
@@ -83,6 +86,7 @@ public class ECG extends Fragment implements ChartFragment.OnChartListener{
 			Bundle savedInstanceState) {
 		// Inflate the layout for this fragment
 		rootView = inflater.inflate(R.layout.fragment_ecg, container, false);
+		textview = (TextView) rootView.findViewById (R.id.textView1);
 		BluetoothChat main = (BluetoothChat) getActivity();
 		return rootView;
 	}
@@ -104,20 +108,9 @@ public class ECG extends Fragment implements ChartFragment.OnChartListener{
 		if (array != null)
 		{
 			fragment.packetQueue.add(array);
-			if (isSTelevated(array)) 
-			{
-				Toast.makeText(getActivity(), "ST Segment Elevation!", Toast.LENGTH_SHORT).show();
-				Time now = new Time();
-				now.setToNow();
-				BluetoothChat.mHistory.add("ST segment elevation detected at\n" + now.format("%Y:%m:%d %H:%M:%S"));
-			}
 		}
 	}
 	
-	public boolean isSTelevated(int[] data) {
-		return (data[25] > 20 || data [26] > 20 || data[27] > 20 || data[28] > 20 || data[29] > 20 || data[30] > 20);
-	}
-
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);

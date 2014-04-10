@@ -26,16 +26,20 @@ import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -111,6 +115,12 @@ public class BluetoothChat extends FragmentActivity implements
     private BluetoothAdapter mBluetoothAdapter = null;
     // Member object for the chat services
     private BluetoothChatService mChatService = null;
+    private static Context mContext;
+    private static Window mWindow;
+    public static PowerManager powerManager;
+    public static PowerManager.WakeLock fullWakeLock;
+    private CountDownTimer timer;
+    private int packetCount = 0;
 
 
     @Override
@@ -118,6 +128,26 @@ public class BluetoothChat extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         if(D) Log.e(TAG, "+++ ON CREATE +++");
 
+        mContext = getApplicationContext();
+        mWindow = getWindow();
+        timer = new CountDownTimer(60000, 1000) 
+        {
+             public void onTick(long millisUntilFinished) 
+             {
+
+             }
+
+             public void onFinish() 
+             {
+            	 ECG ecg = (ECG) mSectionsPagerAdapter.getItem(0);
+            	 if (ecg.textview != null)
+            		 ecg.textview.setText(packetCount);
+            	 packetCount = 0;
+            	 timer.cancel();
+            	 timer.start();
+             }
+      }.start();
+        
         // Set up the window layout
         setContentView(R.layout.main);
 
@@ -159,6 +189,12 @@ public class BluetoothChat extends FragmentActivity implements
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mHistoryList = new ArrayList<String>();
         mHistory = new ArrayAdapter<String> (this, android.R.layout.simple_list_item_1, mHistoryList);
+        
+        // wake lock
+        powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        fullWakeLock = powerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK | 
+        																PowerManager.FULL_WAKE_LOCK | 
+        																PowerManager.ACQUIRE_CAUSES_WAKEUP), "Loneworker - FULL WAKE LOCK");
 
         // If the adapter is null, then Bluetooth is not supported
         if (mBluetoothAdapter == null) {
@@ -336,14 +372,16 @@ public class BluetoothChat extends FragmentActivity implements
                 //mConversationArrayAdapter.add("Me:  " + writeMessage);
                 break;
             case MESSAGE_READ:
-                byte[] readBuf = (byte[]) msg.obj;
-                String data = new String(readBuf, 0, msg.arg1);
+                //byte[] readBuf = (byte[]) msg.obj;
+                //String data = new String(readBuf, 0, msg.arg1);
+            	String data = msg.obj.toString();
 
                 System.out.println();
                 // construct a string from the valid bytes in the buffer
                 //String readMessage = new String(readBuf, 0, msg.arg1);
                 //mConversationArrayAdapter.add(mConnectedDeviceName+":  " + readMessage);
                 onECGUpdateListener(data);
+                packetCount++;
                 break;
             case MESSAGE_DEVICE_NAME:
                 // save the connected device's name
@@ -511,5 +549,21 @@ public class BluetoothChat extends FragmentActivity implements
 		if (ecg != null)
 			ecg.updateData(data);
 	}
-
+	
+	public static Context getContext()
+	{
+		return mContext;
+	}
+	
+	public static void addHistory()
+	{
+		Time now = new Time();
+		now.setToNow();
+		mHistory.add("ST segment elevation detected at\n" + now.format("%Y:%m:%d %H:%M:%S"));
+	}
+	
+	public static Window getAppWindow()
+	{
+		return mWindow;
+	}
 }

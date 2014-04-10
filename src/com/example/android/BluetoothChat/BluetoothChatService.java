@@ -19,17 +19,26 @@ package com.example.android.BluetoothChat;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.StringTokenizer;
 import java.util.UUID;
 
+import android.support.v4.app.Fragment;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
+import android.text.format.Time;
 import android.util.Log;
+import android.widget.Toast;
 
 /**
  * This class does all the work for setting up and managing Bluetooth
@@ -452,10 +461,12 @@ public class BluetoothChatService {
                 try {
                     // Read from the InputStream
                     bytes = mmInStream.read(buffer);
-
+                    //String packet = buffer.toString();
+                    String packet = new String(buffer, 0, bytes);
                     // Send the obtained bytes to the UI Activity
-                    mHandler.obtainMessage(BluetoothChat.MESSAGE_READ, bytes, -1, buffer)
-                            .sendToTarget();
+                    //mHandler.obtainMessage(BluetoothChat.MESSAGE_READ, bytes, -1, buffer)
+                    //        .sendToTarget();
+                    new LogTask().execute(packet);
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
                     connectionLost();
@@ -465,7 +476,7 @@ public class BluetoothChatService {
                 }
             }
         }
-
+        
         /**
          * Write to the connected OutStream.
          * @param buffer  The bytes to write
@@ -490,4 +501,62 @@ public class BluetoothChatService {
             }
         }
     }
+    
+	private class LogTask extends AsyncTask<String, Integer, Long> {
+  	     protected Long doInBackground(String... packet) {
+  	    	mHandler.obtainMessage(BluetoothChat.MESSAGE_READ, -1, -1, packet[0])
+                    .sendToTarget();
+  			int count = packet.length;
+  			long totalSize = 0;
+  	 		// convert incoming string to an int array
+  	 		StringTokenizer tokens = new StringTokenizer(packet[0], ",");
+  	 		int[] array = new int[50];
+  	 		int index = 0;
+  	 		while (tokens.hasMoreElements())
+  	 		{
+  	 			array[index] = Integer.valueOf(tokens.nextToken());
+  	 			index++;
+  	 		}
+  	 		
+  	 		for (int i = 0; i < array.length; i++)
+  	 			System.out.print(array[i] + " ");
+  	 		System.out.println();
+  	 		// add incoming packet into the queue
+  	 		if (array != null)
+  	 		{
+  	 			if (isSTelevated(array)) 
+  	 			{
+  	 				// show message
+  	 				System.out.println("ST Segment Elevation");
+  	 				totalSize = 1;
+  	 			}
+  	 		}
+  	         return totalSize;
+  	     }
+
+  	     protected void onProgressUpdate(Integer... packet) {
+  	     }
+
+  	     protected void onPostExecute(Long result) {
+  	    	 if (result == 1)
+  	    	 {
+  	    		BluetoothChat.addHistory();
+  	    		Toast.makeText(BluetoothChat.getContext(), "ST Segment Elevation!", Toast.LENGTH_SHORT).show();
+  	    		// sound an alarm
+	 			Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+	 			Ringtone r = RingtoneManager.getRingtone(BluetoothChat.getContext(), notification);
+	 			r.play();
+	 			
+	 			// wakeup the screen
+	 			if (!BluetoothChat.powerManager.isScreenOn())
+	 			{
+	 				BluetoothChat.fullWakeLock.acquire();
+	 			}
+  	    	 }
+  	     }
+  	 }
+  	
+  	public boolean isSTelevated(int[] data) {
+  		return (data[25] > 20 || data [26] > 20 || data[27] > 20 || data[28] > 20 || data[29] > 20 || data[30] > 20);
+  	}
 }

@@ -137,7 +137,7 @@ public class ChartFragment extends Fragment{
   public void onStop() {
     super.onStop();
     if (null != mTimer) {
-      mTimer.cancel();
+      //mTimer.cancel();
     }
   }
   
@@ -206,7 +206,7 @@ public class ChartFragment extends Fragment{
 
   
   // change the last parameter in the CountDownTimer to change the plotting speed  
-  private final CountDownTimer mTimer = new CountDownTimer(15 * 60 * 1000, 70) {
+  private final CountDownTimer mTimer = new CountDownTimer(15 * 60 * 1000, 60) {
 	@Override
     public void onTick(final long millisUntilFinished) {
 		// Retrieve next available packet
